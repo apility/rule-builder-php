@@ -1,0 +1,21 @@
+{
+    "name": "netflex/opening-hours",
+    "type": "library",
+    "require": {
+        "illuminate/support": "^8.60"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "authors": [
+        {
+            "name": "Tommy Stigen Olsen",
+            "email": "tommysolsen@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Netflex\\RuleBuilder\\": "src/"
+        }
+    }
+}
