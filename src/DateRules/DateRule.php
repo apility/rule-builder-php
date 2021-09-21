@@ -13,6 +13,7 @@ abstract class DateRule
         'group' => GroupDateRule::class,
         'dayOfWeek' => DayOfWeekDateRule::class,
         'dateRange' => DateRangeRule::class,
+        'not' => NotDateRule::class
     ];
 
     public string $name;
