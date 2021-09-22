@@ -101,9 +101,11 @@ abstract class DateRule
     {
         $children = [];
 
-        /** @var static $child */
-        foreach ($this->children as $child) {
-            array_push($children, $child->explain($date));
+        if (isset($this->children)) {
+            /** @var static $child */
+            foreach ($this->children as $child) {
+                array_push($children, $child->explain($date));
+            }
         }
 
         return new ExplainerNode($this->validate($date), $this->settings(), $children);
