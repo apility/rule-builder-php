@@ -1,52 +1,63 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
-final class DateRuleTest extends TestCase {
+use Carbon\Carbon;
 
-    public function testResolvingGroup(): void {
+use Netflex\RuleBuilder\DateRules\DateRangeRule;
+use Netflex\RuleBuilder\DateRules\DateRule;
+use Netflex\RuleBuilder\DateRules\DayOfWeekDateRule;
+use Netflex\RuleBuilder\DateRules\GroupDateRule;
 
+final class DateRuleTest extends TestCase
+{
+    public function testResolvingGroup(): void
+    {
         $data = [
-            'name' => "test1",
-            'type' => "group",
-            'count' => "any",
+            'name' => 'test1',
+            'type' => 'group',
+            'count' => 'any',
             'children' => []
         ];
 
         $this->assertInstanceOf(
-            \Netflex\RuleBuilder\DateRules\GroupDateRule::class,
-            \Netflex\RuleBuilder\DateRules\DateRule::parse($data)
+            GroupDateRule::class,
+            DateRule::parse($data)
         );
     }
 
-    public function testResolvingDateRange(): void {
-        $rule = \Netflex\RuleBuilder\DateRules\DateRule::parse([
-            'name' => "dateRule",
-            'type' => "dateRange",
-            'from' => "2021-01-01",
-            'to' => "2022-01-01"
+    public function testResolvingDateRange(): void
+    {
+        $rule = DateRule::parse([
+            'name' => 'dateRule',
+            'type' => 'dateRange',
+            'from' => '2021-01-01',
+            'to' => '2022-01-01'
         ]);
 
         $this->assertInstanceOf(
-            \Netflex\RuleBuilder\DateRules\DateRangeRule::class,
-            $rule);
+            DateRangeRule::class,
+            $rule
+        );
 
         $this->assertInstanceOf(
-            \Carbon\Carbon::class,
+            Carbon::class,
             $rule->from,
         );
 
-        $this->assertTrue($rule->from->isSameDay(\Carbon\Carbon::parse("2021-01-01")));
+        $this->assertTrue($rule->from->isSameDay(Carbon::parse('2021-01-01')));
     }
 
-    public function testResolvingDayOfWeek(): void {
-        $rule = \Netflex\RuleBuilder\DateRules\DateRule::parse([
-            'name' => "dateRule",
-            'type' => "dayOfWeek",
-            'days' => [0,1,2,3,4,5],
+    public function testResolvingDayOfWeek(): void
+    {
+        $rule = DateRule::parse([
+            'name' => 'dateRule',
+            'type' => 'dayOfWeek',
+            'days' => [0, 1, 2, 3, 4, 5],
         ]);
 
         $this->assertInstanceOf(
-            \Netflex\RuleBuilder\DateRules\DayOfWeekDateRule::class,
+            DayOfWeekDateRule::class,
             $rule
         );
     }
