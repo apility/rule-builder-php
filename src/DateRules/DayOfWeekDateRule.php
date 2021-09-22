@@ -6,12 +6,13 @@ use Carbon\Carbon;
 
 class DayOfWeekDateRule extends DateRule
 {
+    /** @var int[] */
     public array $days;
 
     /**
      * @inheritDoc
      */
-    function validate(Carbon $date): bool
+    public function validate(Carbon $date): bool
     {
         return collect($this->days)->some(function (int $day) use ($date) {
             return $date->isDayOfWeek($day);

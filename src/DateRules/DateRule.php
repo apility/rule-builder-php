@@ -2,13 +2,21 @@
 
 namespace Netflex\RuleBuilder\DateRules;
 
+use ReflectionClass;
+use ReflectionException;
+
 use Carbon\Carbon;
+use Illuminate\Contracts\Validation\Rule;
+use Netflex\RuleBuilder\RuleCollection;
 use Netflex\RuleBuilder\ExplainerNode;
 use Netflex\RuleBuilder\InvalidConfigurationException;
 use Netflex\RuleBuilder\UnknownNodeType;
 
 abstract class DateRule
 {
+    /**
+     * @var DateRule[]
+     */
     public static array $rules = [
         'group' => GroupDateRule::class,
         'dayOfWeek' => DayOfWeekDateRule::class,
@@ -16,46 +24,70 @@ abstract class DateRule
         'not' => NotDateRule::class
     ];
 
+    /** @var string */
     public string $name;
-    public array $children = [];
+
+    /** @var RuleCollection|null */
+    public ?RuleCollection $children;
 
     /**
+     * @param array $nodeData
+     * @param DateRule[] $rules
      * @throws UnknownNodeType
      */
     public function __construct(array $nodeData, array $rules)
     {
-        $r = new \ReflectionClass($this);
+        $reflectionClass = new ReflectionClass($this);
 
         foreach ($nodeData as $key => $value) {
             try {
-                $prop = $r->getProperty($key);
-                if ($prop->hasType() && $prop->getType()->getName() == Carbon::class) {
-                    $value = $value ? Carbon::parse($value) : null;
-                } else if($prop->hasType() && $prop->getType()->getName() == DateRule::class) {
-                    $value = $value ? DateRule::parse($value, $rules) : null;
-                }
-            } catch (\ReflectionException $e) {
-            }
-            $this->{$key} = $value;
-        }
+                $property = $reflectionClass->getProperty($key);
 
-        foreach ($this->children as $key => $child) {
-            $this->children[$key] = static::parse($child, $rules);
+                if ($property->hasType()) {
+                    $type = $property->getType()->getName();
+
+                    if (is_subclass_of($type, Carbon::class) || $type === Carbon::class) {
+                        $value = $value ? Carbon::parse($value) : null;
+                    }
+
+                    if (is_subclass_of($type, DateRule::class) || $type === DateRule::class) {
+                        $value = $value ? DateRule::parse($value, $rules) : null;
+                    }
+
+                    if (is_subclass_of($type, RuleCollection::class) || $type === RuleCollection::class) {
+                        $value = ($value ? RuleCollection::make($value) : RuleCollection::make([]))->map(function ($child) use ($rules) {
+                            if (!($child instanceof DateRule)) {
+                                return static::parse($child, $rules);
+                            }
+
+                            return $child;
+                        });
+                    }
+                }
+            } catch (ReflectionException $e) {
+                // Unknown property, ignore it
+                continue;
+            }
+
+            $this->{$key} = $value;
         }
     }
 
     /**
+     * @param array $node
+     * @param DateRule[]|null $rules
      * @throws UnknownNodeType
+     * @return DateRule
      */
     public static function parse(array $node, ?array $rules = null): self
     {
         $rules = $rules ?? static::$rules;
 
-        if ($rule = $rules[$node['type']]) {
+        if ($rule = $rules[$node['type']] ?: null) {
             return new $rule($node, $rules);
-        } else {
-            throw new UnknownNodeType("DateRule of type {$node['type']} is not known");
         }
+
+        throw new UnknownNodeType("DateRule of type {$node['type']} is not known");
     }
 
     /**
@@ -65,7 +97,7 @@ abstract class DateRule
      * @return ExplainerNode
      * @throws InvalidConfigurationException
      */
-    function explain(Carbon $date): ExplainerNode
+    public function explain(Carbon $date): ExplainerNode
     {
         $children = [];
 
@@ -84,9 +116,12 @@ abstract class DateRule
      * @return bool
      * @throws InvalidConfigurationException
      */
-    abstract function validate(Carbon $date): bool;
+    abstract public function validate(Carbon $date): bool;
 
-    function settings(): array
+    /**
+     * @return array
+     */
+    public function settings(): array
     {
         return [
             'name' => $this->name

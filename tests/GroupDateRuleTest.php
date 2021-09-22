@@ -2,116 +2,121 @@
 
 use Netflex\RuleBuilder\DateRules\GroupDateRule;
 
-class _AlwaysTrueDateRule extends \Netflex\RuleBuilder\DateRules\DateRule {
+use PHPUnit\Framework\TestCase;
+use Carbon\Carbon;
+use Netflex\RuleBuilder\DateRules\DateRule;
+use Netflex\RuleBuilder\RuleCollection;
 
-    function __construct()
+trait MockDateRule
+{
+    public static function make(): self
     {
-        parent::__construct([], []);
+        return new static([], []);
     }
+}
 
-    function validate(\Carbon\Carbon $date): bool
+class AlwaysTrueDateRule extends DateRule
+{
+    use MockDateRule;
+
+    function validate(Carbon $date): bool
     {
         return true;
     }
 }
 
-class _AlwaysFalseDateRule extends \Netflex\RuleBuilder\DateRules\DateRule {
+class AlwaysFalseDateRule extends DateRule
+{
+    use MockDateRule;
 
-    function __construct()
-    {
-        parent::__construct([], []);
-    }
-
-    function validate(\Carbon\Carbon $date): bool
+    public function validate(Carbon $date): bool
     {
         return false;
     }
 }
 
-class GroupDateRuleTest extends \PHPUnit\Framework\TestCase
+class GroupDateRuleTest extends TestCase
 {
-
-    public function testAnyCase() {
+    public function testAnyCase()
+    {
         $rule = new GroupDateRule(['children' => [], 'name' => "test"], []);
         $rule->count = "any";
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysFalseDateRule(),
-            new _AlwaysFalseDateRule(),
-        ];
-        $this->assertTrue($rule->validate(\Carbon\Carbon::today()));
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysFalseDateRule::make(),
+            AlwaysFalseDateRule::make(),
+        ]);
+        $this->assertTrue($rule->validate(Carbon::today()));
 
-        $rule->children = [
-            new _AlwaysFalseDateRule(),
-            new _AlwaysFalseDateRule(),
-        ];
+        $rule->children = RuleCollection::make([
+            AlwaysFalseDateRule::make(),
+            AlwaysFalseDateRule::make(),
+        ]);
 
-        $this->assertFalse($rule->validate(\Carbon\Carbon::today()));
-
+        $this->assertFalse($rule->validate(Carbon::today()));
     }
 
-    public function testAllCase() {
+    public function testAllCase()
+    {
         $rule = new GroupDateRule(['children' => [], 'name' => "test"], []);
         $rule->count = "all";
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysFalseDateRule(),
-            new _AlwaysFalseDateRule(),
-        ];
-        $this->assertFalse($rule->validate(\Carbon\Carbon::today()));
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysFalseDateRule::make(),
+            AlwaysFalseDateRule::make(),
+        ]);
+        $this->assertFalse($rule->validate(Carbon::today()));
 
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule()
-        ];
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make()
+        ]);
 
-        $this->assertTrue($rule->validate(\Carbon\Carbon::today()));
-
+        $this->assertTrue($rule->validate(Carbon::today()));
     }
 
-    public function testIntCase() {
+    public function testIntCase()
+    {
         $rule = new GroupDateRule(['children' => [], 'name' => "test"], []);
         $rule->count = 2;
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysFalseDateRule(),
-            new _AlwaysFalseDateRule(),
-        ];
-        $this->assertFalse($rule->validate(\Carbon\Carbon::today()));
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysFalseDateRule::make(),
+            AlwaysFalseDateRule::make(),
+        ]);
+        $this->assertFalse($rule->validate(Carbon::today()));
 
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysFalseDateRule(),
-        ];
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysFalseDateRule::make(),
+        ]);
 
         $rule->count = 7;
-        $this->assertFalse($rule->validate(\Carbon\Carbon::today()));
+        $this->assertFalse($rule->validate(Carbon::today()));
         $rule->count = 6;
-        $this->assertTrue($rule->validate(\Carbon\Carbon::today()));
+        $this->assertTrue($rule->validate(Carbon::today()));
         $rule->count = 1;
-        $this->assertTrue($rule->validate(\Carbon\Carbon::today()));
-
+        $this->assertTrue($rule->validate(Carbon::today()));
     }
 
-    public function testIntCountLargerThanChildrenCountToStillPass() {
+    public function testIntCountLargerThanChildrenCountToStillPass()
+    {
         $rule = new GroupDateRule(['children' => [], 'name' => "test"], []);
         $rule->count = 2;
-        $rule->children = [
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-            new _AlwaysTrueDateRule(),
-        ];
+        $rule->children = RuleCollection::make([
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+            AlwaysTrueDateRule::make(),
+        ]);
         $rule->count = 666;
-        $this->assertTrue($rule->validate(\Carbon\Carbon::today()));
+        $this->assertTrue($rule->validate(Carbon::today()));
     }
-
-
 }
