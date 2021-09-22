@@ -6,7 +6,7 @@ use ReflectionClass;
 use ReflectionException;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Validation\Rule;
+
 use Netflex\RuleBuilder\RuleCollection;
 use Netflex\RuleBuilder\ExplainerNode;
 use Netflex\RuleBuilder\InvalidConfigurationException;
@@ -14,14 +14,19 @@ use Netflex\RuleBuilder\UnknownNodeType;
 
 abstract class DateRule
 {
+    const GROUP = 'group';
+    const DAY_OF_WEEK = 'dayOfWeek';
+    const RANGE = 'dateRange';
+    const NOT = 'not';
+
     /**
      * @var DateRule[]
      */
     public static array $rules = [
-        'group' => GroupDateRule::class,
-        'dayOfWeek' => DayOfWeekDateRule::class,
-        'dateRange' => DateRangeRule::class,
-        'not' => NotDateRule::class
+        DateRule::GROUP => GroupDateRule::class,
+        DateRule::DAY_OF_WEEK => DayOfWeekDateRule::class,
+        DateRule::RANGE => DateRangeRule::class,
+        DateRule::NOT => NotDateRule::class
     ];
 
     /** @var string */
