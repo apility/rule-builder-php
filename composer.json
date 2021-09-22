@@ -1,6 +1,7 @@
 {
     "name": "apility/rule-builder",
     "type": "library",
+    "license": "MIT",
     "require": {
         "illuminate/support": "^8.60"
     },
