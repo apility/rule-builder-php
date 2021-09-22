@@ -1,5 +1,5 @@
 {
-    "name": "netflex/opening-hours",
+    "name": "apility/rule-builder",
     "type": "library",
     "require": {
         "illuminate/support": "^8.60"
