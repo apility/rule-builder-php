@@ -1,0 +1,20 @@
+version: 2.1
+
+jobs:
+  tests:
+    docker:
+      - image: circleci/php:7.4
+    steps:
+      - checkout
+      - run:
+          name : Install Composer dependencies
+          command: composer install
+      - run:
+          name : Run test suite
+          command: composer run-script tests
+
+workflows:
+  version: 2
+  testing:
+    jobs:
+      - tests

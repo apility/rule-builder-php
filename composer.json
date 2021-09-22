@@ -17,5 +17,8 @@
         "psr-4": {
             "Netflex\\RuleBuilder\\": "src/"
         }
+    },
+    "scripts": {
+        "tests": "vendor/bin/phpunit --testdox --colors=always"
     }
 }
