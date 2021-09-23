@@ -9,6 +9,9 @@ class DateRangeRule extends DateRule
     public ?Carbon $from;
     public ?Carbon $to;
 
+    /** @var string */
+    public string $name = 'dateRange';
+
     /**
      * @inheritDoc
      */
@@ -23,5 +26,16 @@ class DateRangeRule extends DateRule
         }
 
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    public function settings(): array
+    {
+        return array_merge(parent::settings(), [
+            'from' => $this->from ? $this->from->toDateString() : 'Infinity',
+            'to' => $this->to ? $this->to->toDateString() : 'Infinity',
+        ]);
     }
 }

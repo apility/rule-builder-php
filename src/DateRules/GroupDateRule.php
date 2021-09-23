@@ -20,6 +20,9 @@ class GroupDateRule extends DateRule
     /** @var RuleCollection */
     public ?RuleCollection $children;
 
+    /** @var string */
+    public string $name = 'name';
+
     /**
      * @inheritDoc
      * @throws InvalidConfigurationException
