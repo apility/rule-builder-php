@@ -7,16 +7,19 @@ use ReflectionException;
 
 use Carbon\Carbon;
 
+use Netflex\RuleBuilder\Contracts\Rule;
+
 use Netflex\RuleBuilder\RuleCollection;
 use Netflex\RuleBuilder\ExplainerNode;
 use Netflex\RuleBuilder\InvalidConfigurationException;
 use Netflex\RuleBuilder\UnknownNodeType;
 
-abstract class DateRule
+abstract class DateRule implements Rule
 {
     const GROUP = 'group';
     const DAY_OF_WEEK = 'dayOfWeek';
     const RANGE = 'dateRange';
+    const RECURRING = 'recurring';
     const NOT = 'not';
 
     /**
@@ -26,11 +29,15 @@ abstract class DateRule
         DateRule::GROUP => GroupDateRule::class,
         DateRule::DAY_OF_WEEK => DayOfWeekDateRule::class,
         DateRule::RANGE => DateRangeRule::class,
+        DateRule::RECURRING => DateRuleRecurring::class,
         DateRule::NOT => NotDateRule::class
     ];
 
+    /** @var string|int|null */
+    public $id = null;
+
     /** @var string */
-    public string $name;
+    public string $name = 'dateRule';
 
     /** @var RuleCollection|null */
     public ?RuleCollection $children;
@@ -55,6 +62,7 @@ abstract class DateRule
                         $value = $value ? Carbon::parse($value) : null;
                     }
 
+
                     if (is_subclass_of($type, DateRule::class) || $type === DateRule::class) {
                         $value = $value ? DateRule::parse($value, $rules) : null;
                     }
@@ -76,6 +84,10 @@ abstract class DateRule
 
             $this->{$key} = $value;
         }
+
+        if (!$this->name) {
+            $this->name = $this->type;
+        }
     }
 
     /**
@@ -88,7 +100,7 @@ abstract class DateRule
     {
         $rules = $rules ?? static::$rules;
 
-        if ($rule = $rules[$node['type']] ?: null) {
+        if ($rule = $rules[$node['type']] ?? null) {
             return new $rule($node, $rules);
         }
 
