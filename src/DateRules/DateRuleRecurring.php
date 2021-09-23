@@ -5,9 +5,16 @@ namespace Netflex\RuleBuilder\DateRules;
 use Carbon\Carbon;
 
 use Netflex\RuleBuilder\Contracts\Traversable;
+use Netflex\RuleBuilder\Exceptions\IllegalInterval;
 
 class DateRuleRecurring extends DateRule
 {
+    /** @var string */
+    const YEARLY = 'yearly';
+
+    /** @var string */
+    const MONTHLY = 'monthly';
+
     /** @var string */
     public string $name = 'recurring';
 
@@ -17,8 +24,16 @@ class DateRuleRecurring extends DateRule
     /** @var DateRule */
     public ?DateRule $child;
 
-    public function validate(Carbon $date): bool
+    /**
+     * @inheritDoc
+     * @throws IllegalInterval
+     */
+    public function validate(Carbon $date, $debug = false): bool
     {
+        if (!isset($this->interval) || !in_array($this->interval, [static::YEARLY, static::MONTHLY])) {
+            throw new IllegalInterval;
+        }
+
         if (!$this->child) {
             return true;
         }
