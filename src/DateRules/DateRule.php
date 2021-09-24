@@ -6,26 +6,43 @@ use ReflectionClass;
 use ReflectionException;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Validation\Rule;
+
+use JsonSerializable;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Contracts\Support\Arrayable;
+
+use Netflex\RuleBuilder\Contracts\Rule;
+
 use Netflex\RuleBuilder\RuleCollection;
 use Netflex\RuleBuilder\ExplainerNode;
-use Netflex\RuleBuilder\InvalidConfigurationException;
-use Netflex\RuleBuilder\UnknownNodeType;
 
-abstract class DateRule
+use Netflex\RuleBuilder\Exceptions\InvalidConfigurationException;
+use Netflex\RuleBuilder\Exceptions\UnknownNodeType;
+
+abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
 {
+    const GROUP = 'group';
+    const DAY_OF_WEEK = 'dayOfWeek';
+    const RANGE = 'dateRange';
+    const RECURRING_RANGE = 'recurringDateRange';
+    const NOT = 'not';
+
     /**
      * @var DateRule[]
      */
     public static array $rules = [
-        'group' => GroupDateRule::class,
-        'dayOfWeek' => DayOfWeekDateRule::class,
-        'dateRange' => DateRangeRule::class,
-        'not' => NotDateRule::class
+        DateRule::GROUP => GroupDateRule::class,
+        DateRule::DAY_OF_WEEK => DayOfWeekDateRule::class,
+        DateRule::RANGE => DateRangeRule::class,
+        DateRule::RECURRING_RANGE => RecurringDateRangeRule::class,
+        DateRule::NOT => NotDateRule::class
     ];
 
+    /** @var string|int|null */
+    public $id = null;
+
     /** @var string */
-    public string $name;
+    public string $name = 'dateRule';
 
     /** @var RuleCollection|null */
     public ?RuleCollection $children;
@@ -50,6 +67,7 @@ abstract class DateRule
                         $value = $value ? Carbon::parse($value) : null;
                     }
 
+
                     if (is_subclass_of($type, DateRule::class) || $type === DateRule::class) {
                         $value = $value ? DateRule::parse($value, $rules) : null;
                     }
@@ -71,6 +89,52 @@ abstract class DateRule
 
             $this->{$key} = $value;
         }
+
+        if (!$this->name) {
+            $this->name = $this->type;
+        }
+    }
+
+    /**
+     * @param string $json
+     * @param array|null $rules
+     * @throws UnknownNodeType
+     * @return DateRule
+     */
+    public static function fromJson(string $json, ?array $rules = null): self
+    {
+        return static::parse(json_decode($json, true), $rules);
+    }
+
+    /**
+     * Convert the object to its JSON representation.
+     *
+     * @param  int  $options
+     * @return string
+     */
+    public function toJson($options = 0)
+    {
+        return json_encode($this->jsonSerialize(), $options);
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'id' => isset($this->id) ? $this->id : null,
+            'name' => isset($this->name) ? $this->name : null,
+            'type' => array_search(static::class, static::$rules),
+        ];
     }
 
     /**
@@ -83,7 +147,7 @@ abstract class DateRule
     {
         $rules = $rules ?? static::$rules;
 
-        if ($rule = $rules[$node['type']] ?: null) {
+        if ($rule = $rules[$node['type']] ?? null) {
             return new $rule($node, $rules);
         }
 
@@ -97,16 +161,19 @@ abstract class DateRule
      * @return ExplainerNode
      * @throws InvalidConfigurationException
      */
-    public function explain(Carbon $date): ExplainerNode
+    public function explain(Carbon $date = null): ExplainerNode
     {
+        $date = $date ?? Carbon::now();
         $children = [];
 
-        /** @var static $child */
-        foreach ($this->children as $child) {
-            array_push($children, $child->explain($date));
+        if (isset($this->children)) {
+            /** @var static $child */
+            foreach ($this->children as $child) {
+                array_push($children, $child->explain($date));
+            }
         }
 
-        return new ExplainerNode($this->validate($date), $this->settings(), $children);
+        return new ExplainerNode($this->validate($date), $this->settings($date), $children);
     }
 
     /**
@@ -121,7 +188,7 @@ abstract class DateRule
     /**
      * @return array
      */
-    public function settings(): array
+    public function settings(Carbon $date): array
     {
         return [
             'name' => $this->name
