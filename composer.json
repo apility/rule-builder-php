@@ -3,10 +3,12 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "illuminate/support": "^8.60"
+        "illuminate/support": "^8.60",
+        "ramsey/uuid": "^4.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "larapack/dd": "^1.1"
     },
     "authors": [
         {

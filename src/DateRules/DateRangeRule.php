@@ -9,8 +9,8 @@ class DateRangeRule extends DateRule
     public ?Carbon $from;
     public ?Carbon $to;
 
-    /** @var string */
-    public string $name = 'dateRange';
+    /** @var string|null */
+    public ?string $name = 'dateRange';
 
     /**
      * @inheritDoc

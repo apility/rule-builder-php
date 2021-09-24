@@ -8,6 +8,8 @@ use ReflectionException;
 use Carbon\Carbon;
 
 use JsonSerializable;
+
+use Illuminate\Support\Str;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -41,8 +43,8 @@ abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
     /** @var string|int|null */
     public $id = null;
 
-    /** @var string */
-    public string $name = 'dateRule';
+    /** @var string|null */
+    public ?string $name = 'dateRule';
 
     /** @var RuleCollection|null */
     public ?RuleCollection $children;
@@ -90,8 +92,8 @@ abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
             $this->{$key} = $value;
         }
 
-        if (!$this->name) {
-            $this->name = $this->type;
+        if (!isset($this->id) || !$this->id) {
+            $this->id = Str::uuid();
         }
     }
 
