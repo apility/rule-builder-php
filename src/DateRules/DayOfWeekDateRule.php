@@ -25,7 +25,7 @@ class DayOfWeekDateRule extends DateRule
     /**
      * @return array
      */
-    public function settings(): array
+    public function settings(Carbon $daate): array
     {
         return array_merge(parent::settings(), [
             'days' => $this->days,

@@ -31,7 +31,7 @@ class DateRangeRule extends DateRule
     /**
      * @return array
      */
-    public function settings(): array
+    public function settings(Carbon $date): array
     {
         return array_merge(parent::settings(), [
             'from' => $this->from ? $this->from->toDateString() : 'Infinity',

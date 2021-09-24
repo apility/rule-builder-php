@@ -77,9 +77,9 @@ class GroupDateRule extends DateRule implements Traversable
     /**
      * @return array
      */
-    public function settings(): array
+    public function settings(Carbon $date): array
     {
-        return array_merge(parent::settings(), [
+        return array_merge(parent::settings($date), [
             'count' => $this->count
         ]);
     }

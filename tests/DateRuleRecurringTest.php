@@ -2,21 +2,21 @@
 
 use Carbon\Carbon;
 
-use Netflex\RuleBuilder\DateRules\DateRangeRule;
-use Netflex\RuleBuilder\DateRules\DateRuleRecurring;
+use Netflex\RuleBuilder\DateRules\RecurringDateRangeRule;
 use Netflex\RuleBuilder\Exceptions\IllegalInterval;
 use PHPUnit\Framework\TestCase;
 
-class DateRuleRecurringTest extends TestCase
+class RecurringDateRangeRuleTest extends TestCase
 {
     public function testCanRecurDateRangeYearly()
     {
         $from = Carbon::parse('2021-02-28');
         $to = Carbon::parse('2021-03-03');
 
-        $rule = $this->_bootstrapRule($from, $to, DateRuleRecurring::YEARLY);
+        $rule = $this->_bootstrapRule($from, $to, RecurringDateRangeRule::YEARLY);
 
         $date = Carbon::parse('2021-03-01');
+
         $this->assertTrue($rule->validate($date));
 
         $date = Carbon::parse('2021-02-27');
@@ -34,7 +34,7 @@ class DateRuleRecurringTest extends TestCase
         $from = Carbon::parse('2021-01-02');
         $to = Carbon::parse('2021-01-11');
 
-        $rule = $this->_bootstrapRule($from, $to, DateRuleRecurring::MONTHLY);
+        $rule = $this->_bootstrapRule($from, $to, RecurringDateRangeRule::MONTHLY);
 
         $date = Carbon::parse('2021-01-03');
         $this->assertTrue($rule->validate($date));
@@ -72,12 +72,13 @@ class DateRuleRecurringTest extends TestCase
         $rule->validate($date, true);
     }
 
-    private function _bootstrapRule(?Carbon $from, ?Carbon $to, $interval): DateRuleRecurring
+    private function _bootstrapRule(Carbon $from, Carbon $to, $interval): RecurringDateRangeRule
     {
-        $dateRange = ['type' => 'dateRange', 'from' => $from ? $from->toIso8601String() : null, 'to' => $to ? $to->toIso8601String() : null];
-
-        return new DateRuleRecurring(['name' => 'Recurring', 'interval' => $interval, 'child' => $dateRange], [
-            'dateRange' => DateRangeRule::class
-        ]);
+        return new RecurringDateRangeRule([
+            'name' => 'Recurring',
+            'interval' => $interval,
+            'from' => $from->toIso8601String(),
+            'to' => $to->toIso8601String()
+        ], []);
     }
 }

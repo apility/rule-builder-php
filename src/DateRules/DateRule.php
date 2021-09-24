@@ -11,15 +11,16 @@ use Netflex\RuleBuilder\Contracts\Rule;
 
 use Netflex\RuleBuilder\RuleCollection;
 use Netflex\RuleBuilder\ExplainerNode;
-use Netflex\RuleBuilder\InvalidConfigurationException;
-use Netflex\RuleBuilder\UnknownNodeType;
+
+use Netflex\RuleBuilder\Exceptions\InvalidConfigurationException;
+use Netflex\RuleBuilder\Exceptions\UnknownNodeType;
 
 abstract class DateRule implements Rule
 {
     const GROUP = 'group';
     const DAY_OF_WEEK = 'dayOfWeek';
     const RANGE = 'dateRange';
-    const RECURRING = 'recurring';
+    const RECURRING_RANGE = 'recurringDateRange';
     const NOT = 'not';
 
     /**
@@ -29,7 +30,7 @@ abstract class DateRule implements Rule
         DateRule::GROUP => GroupDateRule::class,
         DateRule::DAY_OF_WEEK => DayOfWeekDateRule::class,
         DateRule::RANGE => DateRangeRule::class,
-        DateRule::RECURRING => DateRuleRecurring::class,
+        DateRule::RECURRING_RANGE => RecurringDateRangeRule::class,
         DateRule::NOT => NotDateRule::class
     ];
 
@@ -114,8 +115,9 @@ abstract class DateRule implements Rule
      * @return ExplainerNode
      * @throws InvalidConfigurationException
      */
-    public function explain(Carbon $date): ExplainerNode
+    public function explain(Carbon $date = null): ExplainerNode
     {
+        $date = $date ?? Carbon::now();
         $children = [];
 
         if (isset($this->children)) {
@@ -125,7 +127,7 @@ abstract class DateRule implements Rule
             }
         }
 
-        return new ExplainerNode($this->validate($date), $this->settings(), $children);
+        return new ExplainerNode($this->validate($date), $this->settings($date), $children);
     }
 
     /**
@@ -140,7 +142,7 @@ abstract class DateRule implements Rule
     /**
      * @return array
      */
-    public function settings(): array
+    public function settings(Carbon $date): array
     {
         return [
             'name' => $this->name

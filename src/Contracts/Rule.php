@@ -30,5 +30,5 @@ interface Rule
     /**
      * @return array
      */
-    public function settings(): array;
+    public function settings(Carbon $date): array;
 }
