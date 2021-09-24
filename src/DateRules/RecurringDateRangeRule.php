@@ -16,8 +16,8 @@ class RecurringDateRangeRule extends DateRule implements Traversable
     /** @var string */
     const MONTHLY = 'monthly';
 
-    /** @var string */
-    public string $name = 'recurrringDateRange';
+    /** @var string|null */
+    public ?string $name = 'recurrringDateRange';
 
     /** @var string */
     public string $interval;

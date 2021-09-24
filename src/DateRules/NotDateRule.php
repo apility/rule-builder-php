@@ -11,8 +11,8 @@ class NotDateRule extends DateRule implements Traversable
     /** @var DateRule */
     public ?DateRule $child;
 
-    /** @var string */
-    public string $name = 'not';
+    /** @var string|null */
+    public ?string $name = 'not';
 
     /**
      * @inheritDoc

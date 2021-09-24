@@ -23,8 +23,8 @@ class GroupDateRule extends DateRule implements Traversable
     /** @var RuleCollection */
     public ?RuleCollection $children;
 
-    /** @var string */
-    public string $name = 'name';
+    /** @var string|null */
+    public ?string $name = 'name';
 
     /**
      * @inheritDoc

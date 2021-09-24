@@ -9,8 +9,8 @@ class DayOfWeekDateRule extends DateRule
     /** @var int[] */
     public array $days = [];
 
-    /** @var string */
-    public string $name = 'dayOfWeek';
+    /** @var string|null */
+    public ?string $name = 'dayOfWeek';
 
     /**
      * @inheritDoc
