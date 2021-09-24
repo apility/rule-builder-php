@@ -31,4 +31,30 @@ interface Rule
      * @return array
      */
     public function settings(Carbon $date): array;
+
+    /**
+     * @param string $json
+     * @param array|null $rules
+     * @throws UnknownNodeType
+     * @return DateRule
+     */
+    public static function fromJson(string $json, ?array $rules = null): self;
+
+    /**
+     * Convert the object to its JSON representation.
+     *
+     * @param  int  $options
+     * @return string
+     */
+    public function toJson($options = 0);
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize();
+
+    /**
+     * @return array
+     */
+    public function toArray();
 }
