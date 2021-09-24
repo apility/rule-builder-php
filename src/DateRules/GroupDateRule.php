@@ -5,7 +5,7 @@ namespace Netflex\RuleBuilder\DateRules;
 use Carbon\Carbon;
 
 use Netflex\RuleBuilder\RuleCollection;
-use Netflex\RuleBuilder\InvalidConfigurationException;
+use Netflex\RuleBuilder\Exceptions\InvalidConfigurationException;
 
 use Netflex\RuleBuilder\Contracts\Traversable;
 
@@ -72,6 +72,20 @@ class GroupDateRule extends DateRule implements Traversable
 
             $callback($child);
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_merge(parent::toArray(), [
+            'count' => $this->count,
+            'children' => isset($this->children)
+                ? $this->children->map(fn (DateRule $child) => $child->toArray())
+                ->toArray()
+                : [],
+        ]);
     }
 
     /**

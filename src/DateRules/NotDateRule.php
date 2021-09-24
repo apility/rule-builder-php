@@ -23,6 +23,16 @@ class NotDateRule extends DateRule implements Traversable
     }
 
     /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_merge(parent::toArray(), [
+            'child' => isset($this->child) ? $this->child->toArray() : null,
+        ]);
+    }
+
+    /**
      * @inheritDoc
      */
     public function traverse(callable $callback)

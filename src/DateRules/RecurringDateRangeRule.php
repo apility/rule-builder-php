@@ -92,6 +92,18 @@ class RecurringDateRangeRule extends DateRule implements Traversable
     /**
      * @return array
      */
+    public function toArray()
+    {
+        return array_merge(parent::toArray(), [
+            'interval' => $this->interval,
+            'from' => $this->from->toDateString(),
+            'to' => $this->to->toDateString(),
+        ]);
+    }
+
+    /**
+     * @return array
+     */
     public function settings(Carbon $date): array
     {
         $dates = $this->getDatesForDate($date);
