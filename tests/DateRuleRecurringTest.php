@@ -16,8 +16,9 @@ class RecurringDateRangeRuleTest extends TestCase
         $rule = $this->_bootstrapRule($from, $to, RecurringDateRangeRule::YEARLY);
 
         $date = Carbon::parse('2021-03-01');
-
         $this->assertTrue($rule->validate($date));
+        $date = Carbon::parse('2021-03-03');
+        $this->assertFalse($rule->validate($date));
 
         $date = Carbon::parse('2021-02-27');
         $this->assertFalse($rule->validate($date));
@@ -38,6 +39,8 @@ class RecurringDateRangeRuleTest extends TestCase
 
         $date = Carbon::parse('2021-01-03');
         $this->assertTrue($rule->validate($date));
+        $date = Carbon::parse('2021-01-11');
+        $this->assertFalse($rule->validate($date));
 
         $date = Carbon::parse('2021-01-12');
         $this->assertFalse($rule->validate($date));

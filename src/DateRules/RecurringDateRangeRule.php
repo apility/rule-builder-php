@@ -69,7 +69,7 @@ class RecurringDateRangeRule extends DateRule implements Traversable
         $from = $dates['from'];
         $to = $dates['to'];
 
-        return $date->isSameDay($from) || $date->between($from, $to);
+        return $date->isSameDay($from) || $date->between($from, $to, false);
     }
 
     /**
