@@ -37,6 +37,12 @@ class AlwaysFalseDateRule extends DateRule
 
 class GroupDateRuleTest extends TestCase
 {
+    public function testEmptyCase()
+    {
+        $rule = new GroupDateRule(['children' => [], 'name' => "test", 'count' => 'any'], []);
+        $this->assertFalse($rule->validate(Carbon::now()));
+    }
+
     public function testAnyCase()
     {
         $rule = new GroupDateRule(['children' => [], 'name' => "test"], []);
