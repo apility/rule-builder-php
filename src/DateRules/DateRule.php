@@ -20,6 +20,7 @@ use Netflex\RuleBuilder\ExplainerNode;
 
 use Netflex\RuleBuilder\Exceptions\InvalidConfigurationException;
 use Netflex\RuleBuilder\Exceptions\UnknownNodeType;
+use SebastianBergmann\Type\UnknownType;
 
 abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
 {
@@ -105,7 +106,13 @@ abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
      */
     public static function fromJson(string $json, ?array $rules = null): self
     {
-        return static::parse(json_decode($json, true), $rules);
+        $payload = json_decode($json, true);
+
+        if ($payload && is_array($payload)) {
+            return static::parse($payload, $rules);
+        }
+
+        throw new UnknownNodeType('Unexpected payload: ' . $json);
     }
 
     /**
