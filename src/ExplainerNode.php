@@ -13,10 +13,14 @@ class ExplainerNode
     /** @var array */
     public array $settings;
 
-    public function __construct(bool $result, array $settings = [], array $children = [])
-    {
-        $this->result = $result;
-        $this->settings = $settings;
-        $this->children = $children;
-    }
+  /** @var string */
+  public string $class;
+
+  public function __construct(bool $result, array $settings = [], array $children = [], string $class = 'unknown')
+  {
+      $this->result = $result;
+      $this->settings = $settings;
+      $this->children = $children;
+      $this->class = $class;
+  }
 }
