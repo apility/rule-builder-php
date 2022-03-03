@@ -58,6 +58,23 @@ class RecurringDateRangeRuleTest extends TestCase
         $this->assertFalse($rule->validate($date));
     }
 
+    public function testDateOverlappingYears()
+    {
+        $from = Carbon::parse('2021-10-01');
+        $to = Carbon::parse('2022-02-28');
+
+        $rule = $this->_bootstrapRule($from, $to, RecurringDateRangeRule::YEARLY);
+
+        $date = Carbon::parse('2022-11-11');
+        $this->assertTrue($rule->validate($date));
+
+        $date = Carbon::parse('2023-01-01');
+        $this->assertTrue($rule->validate($date));
+
+        $date = Carbon::parse('2022-03-01');
+        $this->assertFalse($rule->validate($date));
+    }
+
     public function testThrowsExceptionForIllegalInterval()
     {
         $from = Carbon::parse('2021-01-02');

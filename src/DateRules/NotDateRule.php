@@ -48,4 +48,9 @@ class NotDateRule extends DateRule implements Traversable
             $callback($this->child);
         }
     }
+
+    public function explain(Carbon $date = null): ExplainerNode
+    {
+        return new ExplainerNode($this->validate($date), [], [$this->child->explain($date)], get_class($this));
+    }
 }
