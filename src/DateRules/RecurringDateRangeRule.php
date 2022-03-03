@@ -48,6 +48,10 @@ class RecurringDateRangeRule extends DateRule implements Traversable
                 break;
         }
 
+        if ($from->month > $date->month && $to->month > $date->month) {
+            return ['from' => $from->subYear(), 'to' => $to->subYear()];
+        }
+
         return ['from' => $from, 'to' => $to];
     }
 
