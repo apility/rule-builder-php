@@ -5,6 +5,7 @@ namespace Netflex\RuleBuilder\DateRules;
 use Carbon\Carbon;
 
 use Netflex\RuleBuilder\Contracts\Traversable;
+use Netflex\RuleBuilder\ExplainerNode;
 
 class NotDateRule extends DateRule implements Traversable
 {
