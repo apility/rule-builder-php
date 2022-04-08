@@ -66,10 +66,13 @@ abstract class DateRule implements Rule, JsonSerializable, Jsonable, Arrayable
                 if ($property->hasType()) {
                     $type = $property->getType()->getName();
 
+                    if ($type === 'array' && !is_array($value) && $value instanceof Arrayable) {
+                        $value = $value->toArray();
+                    }
+
                     if (is_subclass_of($type, Carbon::class) || $type === Carbon::class) {
                         $value = $value ? Carbon::parse($value) : null;
                     }
-
 
                     if (is_subclass_of($type, DateRule::class) || $type === DateRule::class) {
                         $value = $value ? DateRule::parse($value, $rules) : null;
