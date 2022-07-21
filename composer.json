@@ -3,7 +3,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "illuminate/support": "^8.60",
+        "illuminate/support": "^8.0 || ^9.0",
         "ramsey/uuid": "^4.0"
     },
     "require-dev": {
