@@ -1,13 +1,87 @@
 <?php
 
 use Carbon\Carbon;
-
 use Netflex\RuleBuilder\DateRules\RecurringDateRangeRule;
 use Netflex\RuleBuilder\Exceptions\IllegalInterval;
 use PHPUnit\Framework\TestCase;
 
-class RecurringDateRangeRuleTest extends TestCase
+class DateRuleRecurringTest extends TestCase
 {
+
+    public function testMonthlyDealsWithDateRangesThatSpansOverNewYears()
+    {
+        ini_set('memory_limit', '5G');
+        $from = Carbon::parse('2025-01-31');
+        $to = Carbon::parse('2025-02-04');
+        $rule = $this->_bootstrapRule($from, $to, 'monthly');
+
+        $period = $from->toPeriod($to->copy()->subDay(), '1 day');
+        $fails = [];
+
+        foreach ($period as $date) {
+            // Dont include last day.
+            if ($period->last()->isSameDay($date)) continue;
+            try {
+                $this->assertTrue($rule->validate($date), "failed:$date\t\tfrom:" . $rule->from . "\t\tto:" . $rule->to);
+            } catch (\PHPUnit\Framework\ExpectationFailedException $exception) {
+                $fails[] = $exception;
+            }
+        }
+
+        foreach ($period->map(fn(Carbon $date) => $date->copy()->addYear()) as $date) {
+            // Dont include last day.
+            if ($period->last()->copy()->addYear()->isSameDay($date)) continue;
+            try {
+                $this->assertTrue($rule->validate($date), "failed:$date\t\tfrom:" . $rule->from . "\t\tto:" . $rule->to);
+            } catch (\PHPUnit\Framework\ExpectationFailedException $exception) {
+                $fails[] = $exception;
+            }
+        }
+
+        if (!empty($fails)) {
+            throw new \PHPUnit\Framework\ExpectationFailedException(
+                count($fails) . " failed: \r\n * " . implode("\n * ", array_map(fn(\PHPUnit\Framework\ExpectationFailedException $exception) => explode("\n", $exception->getMessage())[0], $fails))
+            );
+        }
+    }
+
+    public function testYearlyDealsWithDateRangesThatSpansOverNewYears()
+    {
+        ini_set('memory_limit', '5G');
+        $from = Carbon::parse('2025-09-30');
+        $to = Carbon::parse('2026-03-31');
+        $rule = $this->_bootstrapRule($from, $to, 'yearly');
+
+        $period = $from->toPeriod($to, '1 day');
+        $fails = [];
+
+        foreach ($period as $date) {
+            // Dont include last day.
+            if ($period->last()->isSameDay($date)) continue;
+            try {
+                $this->assertTrue($rule->validate($date), "failed:$date\t\tfrom:" . $rule->from . "\t\tto:" . $rule->to);
+            } catch (\PHPUnit\Framework\ExpectationFailedException $exception) {
+                $fails[] = $exception;
+            }
+        }
+
+        foreach ($period->map(fn(Carbon $date) => $date->copy()->addYear()) as $date) {
+            // Dont include last day.
+            if ($period->last()->copy()->addYear()->isSameDay($date)) continue;
+            try {
+                $this->assertTrue($rule->validate($date), "failed:$date\t\tfrom:" . $rule->from . "\t\tto:" . $rule->to);
+            } catch (\PHPUnit\Framework\ExpectationFailedException $exception) {
+                $fails[] = $exception;
+            }
+        }
+
+        if (!empty($fails)) {
+            throw new \PHPUnit\Framework\ExpectationFailedException(
+                count($fails) . " failed: \r\n * " . implode("\n * ", array_map(fn(\PHPUnit\Framework\ExpectationFailedException $exception) => explode("\n", $exception->getMessage())[0], $fails))
+            );
+        }
+    }
+
     public function testCanRecurDateRangeYearly()
     {
         $from = Carbon::parse('2021-02-28');
@@ -18,7 +92,7 @@ class RecurringDateRangeRuleTest extends TestCase
         $date = Carbon::parse('2021-03-01');
         $this->assertTrue($rule->validate($date));
         $date = Carbon::parse('2021-03-03');
-        $this->assertFalse($rule->validate($date));
+        $this->assertFalse($rule->validate($date), '2021-03-03 validates when it shouldnt');
 
         $date = Carbon::parse('2021-02-27');
         $this->assertFalse($rule->validate($date));

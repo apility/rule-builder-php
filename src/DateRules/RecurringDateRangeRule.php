@@ -3,7 +3,6 @@
 namespace Netflex\RuleBuilder\DateRules;
 
 use Carbon\Carbon;
-
 use Netflex\RuleBuilder\Contracts\Traversable;
 use Netflex\RuleBuilder\Exceptions\IllegalInterval;
 use Netflex\RuleBuilder\Exceptions\InvalidConfigurationException;
@@ -28,52 +27,29 @@ class RecurringDateRangeRule extends DateRule implements Traversable
     /** @var Carbon */
     public Carbon $to;
 
-    protected function getDatesForDate(Carbon $date): array
-    {
-        $from = clone ($this->from);
-        $to = clone ($this->to);
-
-        $year = $date->year;
-        $yearDiff = $from && $to ? ($to->year - $from->year) : 0;
-        $month = $date->month;
-        $monthDiff = $from && $to ? ($to->month - $from->month) : 0;
-
-        switch ($this->interval) {
-            case 'monthly':
-                $from->setMonth($month);
-                $to->setMonth($month + $monthDiff);
-            case 'yearly':
-                $from->setYear($year);
-                $to->setYear($year + $yearDiff);
-                break;
-        }
-
-        if ($from->month > $date->month && $to->month > $date->month) {
-            return ['from' => $from->subYear(), 'to' => $to->subYear()];
-        }
-
-        return ['from' => $from, 'to' => $to];
-    }
-
     /**
      * @inheritDoc
      * @throws IllegalInterval
      */
     public function validate(Carbon $date): bool
     {
-        if (!isset($this->interval) || !in_array($this->interval, [static::YEARLY, static::MONTHLY])) {
-            throw new IllegalInterval;
-        }
-
         if (!isset($this->from) || !isset($this->to)) {
             throw new InvalidConfigurationException('from or to fields cannot be NULL');
         }
 
-        $dates = $this->getDatesForDate($date);
-        $from = $dates['from'];
-        $to = $dates['to'];
+        $period = $this->from->toPeriod($this->to->copy()->subDay());
 
-        return $date->isSameDay($from) || $date->between($from, $to, false);
+        $dayFilter = fn(Carbon $carbon) => $date->day === $carbon->day;
+        $monthFilter = fn(Carbon $carbon) => $date->month === $carbon->month && $dayFilter($carbon);
+
+        switch ($this->interval) {
+            case 'monthly':
+                return $period->addFilter($dayFilter)->count() > 0;
+            case 'yearly':
+                return $period->addFilter($monthFilter)->count() > 0;
+            default:
+                throw new IllegalInterval;
+        }
     }
 
     /**
@@ -110,14 +86,10 @@ class RecurringDateRangeRule extends DateRule implements Traversable
      */
     public function settings(Carbon $date): array
     {
-        $dates = $this->getDatesForDate($date);
-        $from = $dates['from'];
-        $to = $dates['to'];
-
         return array_merge(parent::settings($date), [
             'interval' => $this->interval,
-            'from' => $from->toDateString(),
-            'to' => $to->toDateString(),
+            'from' => $this->from->toDateString(),
+            'to' => $this->to->toDateString(),
         ]);
     }
 }
