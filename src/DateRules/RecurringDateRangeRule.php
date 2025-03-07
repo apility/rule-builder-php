@@ -37,7 +37,12 @@ class RecurringDateRangeRule extends DateRule implements Traversable
             throw new InvalidConfigurationException('from or to fields cannot be NULL');
         }
 
-        $period = $this->from->toPeriod($this->to->copy()->subDay());
+        $to = $this->to->copy();
+        if($to->isBefore($this->from)) {
+            $to->addYear();
+        }
+
+        $period = $this->from->toPeriod($to->copy()->subDay());
 
         $dayFilter = fn(Carbon $carbon) => $date->day === $carbon->day;
         $monthFilter = fn(Carbon $carbon) => $date->month === $carbon->month && $dayFilter($carbon);

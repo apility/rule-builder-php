@@ -8,6 +8,16 @@ use PHPUnit\Framework\TestCase;
 class DateRuleRecurringTest extends TestCase
 {
 
+    public function testFloyenRegression()
+    {
+        $from = Carbon::parse('0001-05-1');
+        $to = Carbon::parse('0001-01-01');
+        $rule = $this->_bootstrapRule($from, $to, 'yearly');
+
+        $this->assertFalse($rule->validate(Carbon::parse('2025-04-30')));
+        $this->assertTrue($rule->validate(Carbon::parse('2025-08-31')), 'Date in august is not correct');
+    }
+
     public function testMonthlyDealsWithDateRangesThatSpansOverNewYears()
     {
         ini_set('memory_limit', '5G');
